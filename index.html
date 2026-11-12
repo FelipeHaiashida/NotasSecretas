@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="NOTA SECRETA — Jogo educativo sobre Processamento Digital de Sinais (PDS), DTFT, DFT, FFT e reconhecimento matemático de notas musicais."
+    />
+    <title>NOTA SECRETA | Descubra a frequência. Encontre a nota.</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+  </head>
+  <body>
+    <a href="#main-heading" class="skip-link visually-hidden">
+      Pular para o conteúdo principal
+    </a>
+
+    <!-- Região viva centralizada para leitores de tela -->
+    <div
+      id="sr-announcer"
+      class="visually-hidden"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <!-- Cabeçalho e Navegação Principal -->
+    <header class="site-header">
+      <div class="header-container">
+        <div class="brand-group">
+          <button
+            type="button"
+            id="btn-brand-home"
+            class="brand-button"
+            aria-label="Voltar para a tela inicial de Nota Secreta"
+          >
+            <svg
+              class="brand-icon"
+              viewBox="0 0 36 36"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                d="M3 18 C8 6, 12 30, 18 18 C24 6, 28 30, 33 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+            </svg>
+            <span class="brand-text">
+              <strong class="brand-name">NOTA SECRETA</strong>
+              <span class="brand-tagline">PDS &bull; Análise Espectral FFT</span>
+            </span>
+          </button>
+        </div>
+
+        <nav class="primary-nav" aria-label="Principal">
+          <button
+            type="button"
+            id="nav-btn-home"
+            class="nav-pill"
+            aria-current="page"
+          >
+            Início
+          </button>
+          <button type="button" id="nav-btn-game" class="nav-pill">
+            Jogar
+          </button>
+          <button type="button" id="nav-btn-lab" class="nav-pill">
+            Laboratório FFT
+          </button>
+          <button type="button" id="nav-btn-howto" class="nav-pill">
+            Como Jogar
+          </button>
+        </nav>
+
+        <div class="audio-controls-bar" role="group" aria-label="Controles de áudio">
+          <label for="global-volume-slider" class="volume-label">
+            <svg
+              class="icon-sm"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path
+                fill="currentColor"
+                d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"
+              />
+            </svg>
+            <span>Volume</span>
+          </label>
+          <input
+            type="range"
+            id="global-volume-slider"
+            class="volume-slider"
+            min="0"
+            max="100"
+            value="70"
+          />
+          <span id="global-volume-value" class="volume-value">70%</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main id="main-content" class="main-container">
+      <h1 id="main-heading" class="visually-hidden" tabindex="-1">
+        NOTA SECRETA — Descubra a frequência. Encontre a nota.
+      </h1>
+
+      <!-- =================================================================
+           TELA 1: TELA INICIAL (HOME)
+           ================================================================= -->
+      <section id="view-home" class="view-section active-view">
+        <div class="hero-card">
+          <div class="hero-badge">
+            Tópico 1.3 de PDS &bull; Análise de Frequência: DTFT, DFT, FFT &amp; Janelamento
+          </div>
+          <h2 class="hero-title">NOTA SECRETA</h2>
+          <p class="hero-subtitle">Descubra a frequência. Encontre a nota.</p>
+          <p class="hero-description">
+            Aplicação interativa de <strong>Aprendizagem Baseada em Projetos (ABP)</strong> e
+            <strong>Sala de Aula Invertida</strong> sobre o <strong>Reconhecimento de Notas Musicais</strong>
+            e o controle de <strong>Vazamento Espectral</strong> via Transformada Rápida de Fourier (FFT).
+          </p>
+
+          <!-- Onda Sonora Animada Interativa na Home -->
+          <div class="hero-wave-wrapper">
+            <canvas
+              id="hero-wave-canvas"
+              width="760"
+              height="110"
+              aria-label="Animação contínua de ondas senoidais superpostas representando sinais acústicos e harmônicos"
+            ></canvas>
+          </div>
+
+          <!-- Trilha Pedagógica: Sala de Aula Invertida & ABP -->
+          <div class="abp-trail-panel" aria-label="Roteiro de Sala de Aula Invertida e ABP">
+            <div class="abp-trail-header">
+              <span class="abp-trail-tag">Metodologia Ativa &bull; Sala de Aula Invertida &amp; ABP</span>
+              <h3 class="section-heading">Roteiro de Estudo e Prática (Proposta 1.3)</h3>
+            </div>
+            <div class="abp-trail-grid">
+              <button type="button" id="btn-trail-theory" class="abp-step-card">
+                <span class="abp-step-num">Etapa 1 &bull; Pré-Aula</span>
+                <strong class="abp-step-title">📘 Fundamentação &amp; Modelagem</strong>
+                <span class="abp-step-desc">
+                  Explore as equações de amostragem (Nyquist), DTFT, DFT, FFT Radix-2 e funções de janelamento.
+                </span>
+              </button>
+
+              <button type="button" id="btn-trail-lab" class="abp-step-card">
+                <span class="abp-step-num">Etapa 2 &bull; Simulação ABP</span>
+                <strong class="abp-step-title">🔬 Laboratório Interativo FFT</strong>
+                <span class="abp-step-desc">
+                  Investigue o vazamento espectral (Hann, Hamming, Blackman vs. Retangular), a resolução Δf = fs/N e o microfone ao vivo.
+                </span>
+              </button>
+
+              <button type="button" id="btn-trail-game" class="abp-step-card">
+                <span class="abp-step-num">Etapa 3 &bull; Desafio Prático</span>
+                <strong class="abp-step-title">🎵 Jogo de Reconhecimento (10 Rodadas)</strong>
+                <span class="abp-step-desc">
+                  Ouça o sinal sintetizado, identifique a nota musical e analise o espectro real calculado pela FFT.
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Seleção de Dificuldade e Configurações da Partida -->
+          <div class="setup-panel">
+            <h3 class="section-heading">1. Escolha o Modo de Jogo</h3>
+            <div
+              class="difficulty-grid"
+              role="radiogroup"
+              aria-label="Modo de dificuldade"
+            >
+              <button
+                type="button"
+                class="difficulty-card selected"
+                data-difficulty="easy"
+                aria-pressed="true"
+              >
+                <div class="diff-top-row">
+                  <span class="diff-tag">Iniciante</span>
+                  <span class="diff-record" id="record-easy">Recorde: 0 pts</span>
+                </div>
+                <strong class="diff-name">Aprendiz Musical</strong>
+                <span class="diff-notes">7 notas naturais (Dó4 a Si4)</span>
+                <span class="diff-desc">
+                  Apenas teclas brancas de uma oitava. Ideal para começar.
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="difficulty-card"
+                data-difficulty="intermediate"
+                aria-pressed="false"
+              >
+                <div class="diff-top-row">
+                  <span class="diff-tag">Intermediário</span>
+                  <span class="diff-record" id="record-intermediate">Recorde: 0 pts</span>
+                </div>
+                <strong class="diff-name">Explorador Cromático</strong>
+                <span class="diff-notes">12 notas com sustenidos (Dó4 a Si4)</span>
+                <span class="diff-desc">
+                  Teclado completo de 1 oitava incluindo sustenidos (♯).
+                </span>
+              </button>
+
+              <button
+                type="button"
+                class="difficulty-card"
+                data-difficulty="hard"
+                aria-pressed="false"
+              >
+                <div class="diff-top-row">
+                  <span class="diff-tag">Avançado</span>
+                  <span class="diff-record" id="record-hard">Recorde: 0 pts</span>
+                </div>
+                <strong class="diff-name">Mestre da FFT</strong>
+                <span class="diff-notes">36 notas em 3 oitavas (Dó3 a Si5)</span>
+                <span class="diff-desc">
+                  Identifique tanto a nota quanto a oitava (grave, central ou aguda).
+                </span>
+              </button>
+            </div>
+
+            <!-- Botões Principais da Tela Inicial -->
+            <div class="hero-actions">
+              <button type="button" id="btn-start-game" class="btn btn-primary btn-lg btn-cta-main">
+                Começar a jogar
+              </button>
+              <button type="button" id="btn-open-lab" class="btn btn-secondary btn-lg">
+                Explorar Laboratório FFT
+              </button>
+              <button
+                type="button"
+                id="btn-open-howto"
+                class="btn btn-outline btn-lg"
+              >
+                Como funciona?
+              </button>
+            </div>
+
+            <!-- Revelação Progressiva: Ajustes Técnicos Opcionais de PDS -->
+            <details class="advanced-settings-disclosure">
+              <summary class="advanced-settings-summary">
+                <span>Ajustes de Síntese e Janelamento da FFT (Opcional)</span>
+              </summary>
+              <div class="game-options-row">
+                <div class="option-field">
+                  <label for="game-timbre-select">Timbre do sintetizador:</label>
+                  <select id="game-timbre-select" class="select-control">
+                    <option value="harmonic" selected>
+                      Piano Harmônico — Fundamental + múltiplos (f₀ a 8f₀)
+                    </option>
+                    <option value="sine">
+                      Senoidal Puro — Apenas frequência fundamental (f₀)
+                    </option>
+                  </select>
+                </div>
+
+                <div class="option-field">
+                  <label for="game-window-select">Janela espectral da FFT:</label>
+                  <select id="game-window-select" class="select-control">
+                    <option value="hann">
+                      Janela de Hann (1º lóbulo: −31,5 dB &bull; Recomendado)
+                    </option>
+                    <option value="hamming">
+                      Janela de Hamming (1º lóbulo: −42,7 dB)
+                    </option>
+                    <option value="blackman">
+                      Janela de Blackman (1º lóbulo: −58,1 dB &bull; Máx. supressão)
+                    </option>
+                    <option value="rectangular">
+                      Janela Retangular (1º lóbulo: −13,3 dB &bull; Sem suavização)
+                    </option>
+                  </select>
+                </div>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           TELA 2: TELA DE JOGO & FEEDBACK POR RODADA
+           ================================================================= -->
+      <section id="view-game" class="view-section" hidden>
+        <!-- Barra de Status da Partida -->
+        <div class="match-hud">
+          <div class="hud-item">
+            <span class="hud-label">Rodada</span>
+            <strong class="hud-value" id="hud-round">1 / 10</strong>
+          </div>
+          <div class="hud-progress-wrapper">
+            <label for="round-progress-bar" class="visually-hidden"
+              >Progresso da partida</label
+            >
+            <progress
+              id="round-progress-bar"
+              class="round-progress"
+              value="1"
+              max="10"
+            ></progress>
+          </div>
+          <div class="hud-item">
+            <span class="hud-label">Modo</span>
+            <strong class="hud-value hud-badge" id="hud-difficulty"
+              >Aprendiz Musical</strong
+            >
+          </div>
+          <div class="hud-item hud-score-box" id="hud-score-container">
+            <span class="hud-label">Pontuação</span>
+            <strong class="hud-value score-highlight" id="hud-score">0</strong>
+          </div>
+        </div>
+
+        <div class="game-stage-card">
+          <!-- ETAPA A DA RODADA: ESCUTA E RESPOSTA (Ocultada após confirmar para evitar rolagem e poluição) -->
+          <div id="round-question-stage" class="round-question-stage">
+            <div class="game-question-header">
+              <h2 id="game-question-title" class="stage-title">
+                Qual nota musical você está ouvindo?
+              </h2>
+              <p class="stage-subtitle" id="game-question-subtitle">
+                1. Clique em <strong>Ouvir nota</strong> &bull; 2. Selecione a nota abaixo &bull; 3. Confirme sua resposta
+              </p>
+            </div>
+
+            <!-- Barra Unificada de Áudio + Onda Compacta Ao Vivo -->
+            <div class="listen-deck">
+              <div class="playback-actions">
+                <button
+                  type="button"
+                  id="btn-play-note"
+                  class="btn btn-primary btn-play-hero"
+                >
+                  <svg
+                    class="icon-md"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path fill="currentColor" d="M8 5v14l11-7z" />
+                  </svg>
+                  <span id="btn-play-note-label">Ouvir nota</span>
+                </button>
+
+                <button
+                  type="button"
+                  id="btn-replay-note"
+                  class="btn btn-outline"
+                  disabled
+                >
+                  Repetir nota secreta
+                </button>
+
+                <button
+                  type="button"
+                  id="btn-play-ref-c4"
+                  class="btn btn-outline"
+                  title="Toca a nota Dó4 (261,63 Hz) para servir de referência auditiva"
+                >
+                  🎹 Ouvir Referência (Dó4)
+                </button>
+
+                <button type="button" id="btn-request-hint" class="btn btn-hint">
+                  Pedir dica (-40 pts)
+                </button>
+              </div>
+
+              <div class="live-wave-box">
+                <canvas
+                  id="game-live-wave-canvas"
+                  width="720"
+                  height="125"
+                  aria-label="Visualização da onda sonora no domínio do tempo"
+                ></canvas>
+                <div class="wave-status-overlay" id="wave-status-badge">
+                  Clique em "Ouvir nota" para sintetizar e escutar o sinal
+                </div>
+              </div>
+            </div>
+
+            <!-- Caixa de Dica (Exibida quando solicitada) -->
+            <div id="hint-banner" class="hint-banner" hidden>
+              <strong>💡 Dica Espectral:</strong>
+              <span id="hint-text"></span>
+            </div>
+
+            <!-- Seleção de Resposta (Adaptada por Dificuldade) -->
+            <div class="answer-selection-area">
+              <!-- Seletor de Oitava (Visível apenas no Modo Difícil: Dó3 a Si5) -->
+              <div id="octave-selector-bar" class="octave-selector-bar" hidden>
+                <span class="octave-label">Escolha a Oitava:</span>
+                <div
+                  class="octave-buttons"
+                  role="group"
+                  aria-label="Oitava musical"
+                >
+                  <button
+                    type="button"
+                    class="octave-btn"
+                    data-octave="3"
+                    aria-pressed="false"
+                  >
+                    3ª Oitava (Grave: Dó3–Si3)
+                  </button>
+                  <button
+                    type="button"
+                    class="octave-btn active"
+                    data-octave="4"
+                    aria-pressed="true"
+                  >
+                    4ª Oitava (Central: Dó4–Si4)
+                  </button>
+                  <button
+                    type="button"
+                    class="octave-btn"
+                    data-octave="5"
+                    aria-pressed="false"
+                  >
+                    5ª Oitava (Aguda: Dó5–Si5)
+                  </button>
+                </div>
+              </div>
+
+              <!-- Cabeçalho do Pianinho Interativo -->
+              <div class="piano-toolbar">
+                <span class="piano-toolbar-title">🎹 Teclado do Piano Virtual (Clique na tecla para selecionar):</span>
+                <label class="checkbox-inline" for="game-piano-preview-sound">
+                  <input type="checkbox" id="game-piano-preview-sound" checked />
+                  <span>Ouvir som da tecla ao clicar no piano</span>
+                </label>
+              </div>
+
+              <!-- Container dinâmico do piano de 1 oitava -->
+              <div
+                id="note-options-container"
+                class="note-options-container"
+                role="group"
+                aria-label="Teclado de piano virtual com opções de notas musicais"
+              ></div>
+
+              <div class="confirm-bar">
+                <div class="selected-note-preview" id="selected-note-preview">
+                  Selecione uma nota acima para habilitar a confirmação
+                </div>
+                <button
+                  type="button"
+                  id="btn-confirm-answer"
+                  class="btn btn-accent btn-lg"
+                  disabled
+                >
+                  Confirmar resposta
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- =============================================================
+               ETAPA B DA RODADA: PAINEL DE FEEDBACK E ANÁLISE FFT
+               ============================================================= -->
+          <div id="round-feedback-panel" class="feedback-panel" hidden>
+            <div id="feedback-header-banner" class="feedback-banner">
+              <div class="feedback-status-group">
+                <span id="feedback-icon" class="feedback-icon" aria-hidden="true"></span>
+                <div>
+                  <h3 id="feedback-title" class="feedback-title">Resultado</h3>
+                  <p id="feedback-points" class="feedback-points"></p>
+                </div>
+              </div>
+              <div class="feedback-banner-actions">
+                <button
+                  type="button"
+                  id="btn-feedback-replay"
+                  class="btn btn-outline"
+                >
+                  🔊 Ouvir nota novamente
+                </button>
+                <button
+                  type="button"
+                  id="btn-next-round"
+                  class="btn btn-primary btn-lg"
+                >
+                  Próxima rodada &rarr;
+                </button>
+              </div>
+            </div>
+
+            <!-- Resumo Didático em 3 Cartões Semânticos (Menos Poluído) -->
+            <div class="feedback-summary-grid">
+              <div class="summary-card">
+                <span class="summary-card-title">1. Notas Musicais</span>
+                <div class="summary-pair">
+                  <div>
+                    <span class="metric-label">Nota Sorteada</span>
+                    <strong class="metric-value highlight-cyan" id="fb-target-note">—</strong>
+                  </div>
+                  <div>
+                    <span class="metric-label">Sua Resposta</span>
+                    <strong class="metric-value" id="fb-selected-note">—</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="summary-card">
+                <span class="summary-card-title">2. Frequência Fundamental (f₀)</span>
+                <div class="summary-pair">
+                  <div>
+                    <span class="metric-label">Detectada pela FFT</span>
+                    <strong class="metric-value highlight-violet" id="fb-detected-freq">—</strong>
+                  </div>
+                  <div>
+                    <span class="metric-label">Valor Teórico Exato</span>
+                    <strong class="metric-value" id="fb-theoretical-freq">—</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="summary-card">
+                <span class="summary-card-title">3. Precisão Matemática da FFT</span>
+                <div class="summary-pair">
+                  <div>
+                    <span class="metric-label">Erro Absoluto</span>
+                    <strong class="metric-value" id="fb-error-hz">—</strong>
+                  </div>
+                  <div>
+                    <span class="metric-label">Desvio Musical</span>
+                    <strong class="metric-value" id="fb-error-cents">—</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gráficos Reais da Rodada: Forma de Onda e Espectro FFT Lado a Lado -->
+            <div class="feedback-charts-grid">
+              <figure class="chart-card">
+                <figcaption class="chart-caption">
+                  <span>Domínio do Tempo — Onda Sonora x[n]</span>
+                  <span class="chart-sub">Trecho de 15 ms do sinal</span>
+                </figcaption>
+                <canvas
+                  id="fb-waveform-canvas"
+                  width="540"
+                  height="200"
+                  aria-label="Gráfico da forma de onda da nota sorteada no domínio do tempo"
+                ></canvas>
+              </figure>
+
+              <figure class="chart-card">
+                <figcaption class="chart-caption">
+                  <span>Domínio da Frequência — Espectro FFT |X[k]|</span>
+                  <span class="chart-sub" id="fb-spectrum-sub"
+                    >N = 16.384 amostras</span
+                  >
+                </figcaption>
+                <canvas
+                  id="fb-spectrum-canvas"
+                  width="540"
+                  height="200"
+                  aria-label="Gráfico do espectro de frequências calculado pela FFT com pico marcado"
+                ></canvas>
+              </figure>
+            </div>
+
+            <!-- Pipeline Didático Passo a Passo + Explicação -->
+            <div class="feedback-explanation-box">
+              <h4>Como o computador descobriu esta nota? (Passo a Passo)</h4>
+              <div id="fb-pipeline-steps" class="pipeline-steps"></div>
+              <p id="fb-explanation-text" class="explanation-detail-text"></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           TELA 3: TELA DE RESULTADOS FINAIS (APÓS 10 RODADAS)
+           ================================================================= -->
+      <section id="view-results" class="view-section" hidden>
+        <div class="results-card">
+          <div class="results-badge" id="res-badge">Partida Concluída</div>
+          <h2 class="results-title" id="res-title">Resultado Final</h2>
+          <p class="results-message" id="res-message"></p>
+
+          <div class="results-stats-grid">
+            <div class="stat-box">
+              <span class="stat-label">Pontuação Final</span>
+              <strong class="stat-number highlight-cyan" id="res-score"
+                >0 / 1000</strong
+              >
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Acertos</span>
+              <strong class="stat-number text-success" id="res-correct">0</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Erros</span>
+              <strong class="stat-number text-danger" id="res-wrong">0</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Taxa de Acerto</span>
+              <strong class="stat-number" id="res-accuracy">0%</strong>
+            </div>
+            <div class="stat-box">
+              <span class="stat-label">Modo Jogado</span>
+              <strong class="stat-number stat-text-md" id="res-difficulty"
+                >—</strong
+              >
+            </div>
+          </div>
+
+          <!-- Tabela Acessível com o Histórico Real das 10 Rodadas -->
+          <div class="results-table-wrapper">
+            <table>
+              <caption>
+                Resumo analítico das 10 rodadas (Frequência Teórica vs. FFT)
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">#</th>
+                  <th scope="col">Nota Sorteada</th>
+                  <th scope="col">Sua Resposta</th>
+                  <th scope="col">f Teórica</th>
+                  <th scope="col">f Estimada (FFT)</th>
+                  <th scope="col">Erro (cents)</th>
+                  <th scope="col">Pontos</th>
+                </tr>
+              </thead>
+              <tbody id="res-history-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="results-actions">
+            <button
+              type="button"
+              id="btn-play-again"
+              class="btn btn-primary btn-lg"
+            >
+              Jogar novamente
+            </button>
+            <button
+              type="button"
+              id="btn-results-to-lab"
+              class="btn btn-secondary btn-lg"
+            >
+              Explorar laboratório
+            </button>
+            <button
+              type="button"
+              id="btn-results-home"
+              class="btn btn-outline btn-lg"
+            >
+              Mudar dificuldade
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- =================================================================
+           TELA 4: LABORATÓRIO FFT — ENTENDA COMO O COMPUTADOR ESCUTA
+           ================================================================= -->
+      <section id="view-lab" class="view-section" hidden>
+        <div class="lab-header-card">
+          <div>
+            <span class="hero-badge">Simulador Interativo de PDS &bull; Tópico 1.3 (DTFT, DFT, FFT e Janelamento)</span>
+            <h2 class="lab-main-title">
+              Laboratório FFT — Entenda como o computador escuta
+            </h2>
+            <p class="lab-subtitle">
+              Teste experimentos guiados em 1 clique, ajuste o tamanho do bloco <code>N</code>, compare as janelas
+              de Hann, Hamming, Blackman e Retangular ou use seu próprio microfone ao vivo.
+            </p>
+          </div>
+          <div class="lab-header-actions">
+            <button type="button" id="btn-lab-play-audio" class="btn btn-primary">
+              🔊 Ouvir Sinal Sintetizado
+            </button>
+            <button
+              type="button"
+              id="btn-lab-mic-toggle"
+              class="btn btn-secondary"
+              aria-pressed="false"
+            >
+              🎙️ Testar com Microfone
+            </button>
+            <button type="button" id="btn-lab-back-game" class="btn btn-outline">
+              Voltar ao Jogo
+            </button>
+          </div>
+        </div>
+
+        <!-- BARRA DIDÁTICA: Experimentos Guiados de 1 Clique -->
+        <div class="lab-experiments-card">
+          <div class="experiments-header">
+            <h3 class="section-heading">Experimentos Guiados do Tópico 1.3 (Clique para simular):</h3>
+            <span class="experiments-hint">Configura automaticamente os parâmetros matemáticos e o zoom ideal</span>
+          </div>
+          <div class="experiments-grid">
+            <button type="button" id="btn-exp-exact" class="experiment-btn">
+              <span class="exp-badge">Experimento 1 &bull; DFT sem Vazamento</span>
+              <strong class="exp-title">🎯 Frequência Exata em um Bin</strong>
+              <span class="exp-desc">
+                Quando f₀ é múltiplo exato de Δf (fs/N), a onda fecha ciclos inteiros na janela e não há vazamento espectral.
+              </span>
+            </button>
+
+            <button type="button" id="btn-exp-leakage" class="experiment-btn active">
+              <span class="exp-badge">Experimento 2 &bull; Windowing</span>
+              <strong class="exp-title">🌊 Vazamento Espectral (Janelamento)</strong>
+              <span class="exp-desc">
+                Frequência entre dois bins (k + 0,5). Compare em dB como Hann, Hamming e Blackman suprimem os lóbulos laterais.
+              </span>
+            </button>
+
+            <button type="button" id="btn-exp-harmonics" class="experiment-btn">
+              <span class="exp-badge">Experimento 3 &bull; Decomposição Espectral</span>
+              <strong class="exp-title">🎹 Série Harmônica e Timbre Musical</strong>
+              <span class="exp-desc">
+                Adiciona múltiplos inteiros (2f₀ a 5f₀). Observe a onda complexa no tempo e as raias espectrais na FFT.
+              </span>
+            </button>
+
+            <button type="button" id="btn-exp-resolution" class="experiment-btn">
+              <span class="exp-badge">Experimento 4 &bull; Resolução Δf = fs/N</span>
+              <strong class="exp-title">🔬 Efeito do Tamanho do Bloco N</strong>
+              <span class="exp-desc">
+                Reduz N para 2.048 amostras (Δf = 23,44 Hz) em uma nota grave (Dó3) para demonstrar o espaçamento entre bins.
+              </span>
+            </button>
+          </div>
+
+          <div id="lab-experiment-callout" class="experiment-callout">
+            <strong>O que observar agora:</strong> Compare a curva azul (Janela ativa) e a curva vermelha (Janela Retangular).
+          </div>
+        </div>
+
+        <!-- Painéis 1, 2 e 3: Gráficos no Topo para Feedback Visual Imediato -->
+        <div class="lab-panels-grid">
+          <!-- PAINEL 1: Sinal no Domínio do Tempo -->
+          <article class="lab-panel-card">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">Domínio do Tempo</span>
+                <h3 class="panel-title">Forma de Onda Discreta x[n]</h3>
+              </div>
+              <div class="panel-inline-control">
+                <label class="checkbox-inline" for="lab-show-window-env">
+                  <input type="checkbox" id="lab-show-window-env" checked />
+                  <span>Ver janela w[n]</span>
+                </label>
+                <label for="lab-time-span-select" class="visually-hidden">Janela temporal</label>
+                <select id="lab-time-span-select" class="select-control-sm" aria-label="Janela temporal em milissegundos">
+                  <option value="10">10 ms (Ver amostras)</option>
+                  <option value="20" selected>20 ms</option>
+                  <option value="40">40 ms</option>
+                </select>
+              </div>
+            </div>
+            <p class="panel-desc">
+              Amostras <code>x[n] = A · sen(2πfn / fs)</code>. A linha tracejada ilustra como a janela
+              <code>w[n]</code> pondera as bordas antes da FFT.
+            </p>
+            <canvas
+              id="lab-waveform-canvas"
+              width="600"
+              height="230"
+              aria-label="Painel 1: Gráfico do sinal no domínio do tempo em milissegundos por amplitude normalizada"
+            ></canvas>
+          </article>
+
+          <!-- PAINEL 2 & 3: Espectro de Frequências e Comparação entre Janelas -->
+          <article class="lab-panel-card">
+            <div class="panel-header">
+              <div>
+                <span class="panel-tag">Domínio da Frequência</span>
+                <h3 class="panel-title">
+                  Espectro de Magnitude |X[k]| (FFT)
+                </h3>
+              </div>
+              <div class="legend-pills">
+                <span class="legend-item legend-active" id="lab-legend-primary"
+                  >Janela Ativa</span
+                >
+                <span
+                  class="legend-item legend-compare"
+                  id="lab-legend-secondary"
+                  >Comparação</span
+                >
+              </div>
+            </div>
+            <p class="panel-desc" id="lab-leakage-callout">
+              No zoom próximo ao pico (±75 Hz), cada ponto representa um <strong>bin discreto k</strong> da FFT espaçado em <code>Δf = 2,93 Hz</code>.
+            </p>
+            <canvas
+              id="lab-spectrum-canvas"
+              width="600"
+              height="230"
+              aria-label="Painéis 2 e 3: Gráfico da magnitude espectral da FFT e comparação entre janela de Hann e janela retangular"
+            ></canvas>
+          </article>
+        </div>
+
+        <!-- Barra de Controles Manuais do Laboratório -->
+        <div class="lab-controls-card">
+          <h3 class="section-heading">Controles Manuais do Sinal e do Espectro</h3>
+
+          <div class="lab-controls-grid">
+            <!-- Frequência Arbitrária (Slider + Input Numérico + Alinhamento aos Bins) -->
+            <div class="control-group control-group-wide">
+              <label for="lab-freq-input">
+                Frequência Fundamental f₀:
+                <strong id="lab-freq-display" class="highlight-cyan"
+                  >440,00 Hz</strong
+                >
+              </label>
+              <div class="freq-inputs-inline">
+                <input
+                  type="range"
+                  id="lab-freq-slider"
+                  min="110"
+                  max="1100"
+                  step="0.1"
+                  value="440"
+                  aria-label="Controle deslizante de frequência em Hz"
+                />
+                <input
+                  type="number"
+                  id="lab-freq-input"
+                  class="number-control"
+                  min="65"
+                  max="2000"
+                  step="0.01"
+                  value="440"
+                />
+              </div>
+              <div class="leakage-presets">
+                <button
+                  type="button"
+                  id="btn-lab-align-bin"
+                  class="btn-chip"
+                >
+                  🎯 Cravar em um bin k exato (Zero Vazamento)
+                </button>
+                <button
+                  type="button"
+                  id="btn-lab-misalign-bin"
+                  class="btn-chip"
+                >
+                  🌊 Cair entre dois bins (k + 0,5 &bull; Máximo Vazamento)
+                </button>
+              </div>
+            </div>
+
+            <!-- Seleção de Nota Musical Rápida -->
+            <div class="control-group">
+              <label for="lab-note-preset">Escolher Nota Musical (Preset):</label>
+              <select id="lab-note-preset" class="select-control"></select>
+            </div>
+
+            <!-- Timbre -->
+            <div class="control-group">
+              <label for="lab-timbre-select">Timbre do Sinal x[n]:</label>
+              <select id="lab-timbre-select" class="select-control">
+                <option value="harmonic">
+                  Piano Harmônico (f₀ + múltiplos 2f₀ a 8f₀)
+                </option>
+                <option value="sine" selected>Senoidal Puro (Apenas Fundamental f₀)</option>
+              </select>
+            </div>
+
+            <!-- Janela Espectral + Comparação -->
+            <div class="control-group">
+              <label for="lab-window-select">Função de Janelamento w[n]:</label>
+              <div class="zoom-row">
+                <select id="lab-window-select" class="select-control">
+                  <option value="hann">Janela de Hann (−31,5 dB)</option>
+                  <option value="hamming">Janela de Hamming (−42,7 dB)</option>
+                  <option value="blackman">Janela de Blackman (−58,1 dB)</option>
+                  <option value="rectangular">Janela Retangular (−13,3 dB)</option>
+                </select>
+                <select
+                  id="lab-compare-windows"
+                  class="select-control"
+                  aria-label="Modo de comparação entre janelas"
+                >
+                  <option value="both">Sobrepor referência</option>
+                  <option value="single">Só janela ativa</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tamanho do Bloco N da FFT (Resolução Espectral vs Custo) -->
+            <div class="control-group">
+              <label for="lab-fftsize-select">Tamanho do Bloco N (Amostras da FFT):</label>
+              <select id="lab-fftsize-select" class="select-control">
+                <option value="1024">N = 1.024 (Δf ≈ 46,88 Hz &bull; Baixa resolução)</option>
+                <option value="2048">N = 2.048 (Δf ≈ 23,44 Hz)</option>
+                <option value="4096">N = 4.096 (Δf ≈ 11,72 Hz)</option>
+                <option value="8192">N = 8.192 (Δf ≈ 5,86 Hz)</option>
+                <option value="16384" selected>N = 16.384 (Δf ≈ 2,93 Hz &bull; Alta precisão)</option>
+              </select>
+            </div>
+
+            <!-- Faixa de Zoom e Escala do Espectro -->
+            <div class="control-group">
+              <label for="lab-zoom-select">Visualização do Espectro:</label>
+              <div class="zoom-row">
+                <select id="lab-zoom-select" class="select-control">
+                  <option value="around-peak">
+                    Zoom no Pico (±75 Hz — Ver Bins)
+                  </option>
+                  <option value="band-1200">
+                    Faixa Musical (0 a 1.200 Hz)
+                  </option>
+                  <option value="band-3000">
+                    Faixa de Harmônicos (0 a 3.000 Hz)
+                  </option>
+                </select>
+                <select
+                  id="lab-scale-select"
+                  class="select-control"
+                  aria-label="Escala vertical do espectro"
+                >
+                  <option value="db">Escala em Decibéis (dB)</option>
+                  <option value="linear">Escala Linear (0 a 1)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAINEL 4: Análise Matemática Organizada em 3 Colunas Semânticas -->
+        <article class="lab-panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="panel-tag">Leitura Matemática em Tempo Real</span>
+              <h3 class="panel-title">
+                Do Sinal Sintetizado à Nota Identificada pela FFT
+              </h3>
+            </div>
+            <!-- Constantes de Sistema Compactas no Topo do Painel -->
+            <div class="system-constants-bar" aria-label="Parâmetros fixos da análise">
+              <span class="const-pill">Taxa <code>fs</code>: <strong id="lab-val-fs">48.000 Hz</strong></span>
+              <span class="const-pill">Bloco <code>N</code>: <strong id="lab-val-n">16.384</strong></span>
+              <span class="const-pill">Resolução <code>Δf = fs/N</code>: <strong id="lab-val-deltaf">2,93 Hz</strong></span>
+            </div>
+          </div>
+
+          <div class="math-columns-grid">
+            <!-- Coluna 1: O Sinal & Nota Musical -->
+            <div class="math-group-card">
+              <h4 class="math-group-title">1. Sinal &amp; Escala Musical</h4>
+              <div class="math-kv-list">
+                <div class="math-kv-item">
+                  <span class="metric-label">Nota Mais Próxima</span>
+                  <strong class="metric-value highlight-cyan" id="lab-val-note">Lá4 (MIDI 69)</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Frequência Gerada (f_sinal)</span>
+                  <strong class="metric-value" id="lab-val-synth-freq">440,00 Hz</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Frequência Padrão da Nota</span>
+                  <strong class="metric-value" id="lab-val-note-freq">440,00 Hz</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Desvio até a Nota Padrão</span>
+                  <strong class="metric-value" id="lab-val-note-cents">0,00 cents</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna 2: O que a FFT Detectou -->
+            <div class="math-group-card">
+              <h4 class="math-group-title">2. O que a FFT Enxergou</h4>
+              <div class="math-kv-list">
+                <div class="math-kv-item">
+                  <span class="metric-label">Frequência Estimada (FFT + Parábola)</span>
+                  <strong class="metric-value highlight-violet" id="lab-val-est-freq">440,00 Hz</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Bin Espectral de Pico (k_max)</span>
+                  <strong class="metric-value" id="lab-val-bin">k = 150</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Janela Aplicada w[n]</span>
+                  <strong class="metric-value" id="lab-val-window">Janela de Hann</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Propriedades Espectrais de w[n]</span>
+                  <strong class="metric-value" id="lab-val-win-props">Lóbulo: 4 bins | 1º Lateral: −31,5 dB</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- Coluna 3: Precisão Numérica & Complexidade -->
+            <div class="math-group-card">
+              <h4 class="math-group-title">3. Precisão &amp; Ganho Computacional</h4>
+              <div class="math-kv-list">
+                <div class="math-kv-item">
+                  <span class="metric-label">Erro Absoluto |f_est − f_sinal|</span>
+                  <strong class="metric-value text-success" id="lab-val-err-hz">0,000 Hz</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Erro Relativo em Cents</span>
+                  <strong class="metric-value text-success" id="lab-val-err-cents">0,00 cents</strong>
+                </div>
+                <div class="math-kv-item">
+                  <span class="metric-label">Operações: FFT O(N log₂ N) vs. DFT O(N²)</span>
+                  <strong class="metric-value highlight-cyan" id="lab-val-complexity">229.376 vs. 268,4M (1.170× mais rápida)</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- PAINEL 5: Explicação Educativa (9 Tópicos Fundamentais de PDS) -->
+        <article class="lab-panel-card">
+          <div class="panel-header">
+            <div>
+              <span class="panel-tag">Guia Conceitual</span>
+              <h3 class="panel-title">
+                Fundamentos Teóricos de Processamento Digital de Sinais
+              </h3>
+            </div>
+          </div>
+          <p class="panel-desc">
+            Clique em qualquer pergunta abaixo para ler a explicação direta com a fórmula correspondente.
+          </p>
+          <div id="educational-topics-list" class="educational-accordion"></div>
+        </article>
+      </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="site-footer">
+      <div class="footer-container">
+        <p>
+          <strong>NOTA SECRETA</strong> &mdash; Projeto Educativo de
+          Processamento Digital de Sinais (Ciência da Computação).
+        </p>
+        <p class="footer-sub">
+          Análise de Frequência com DTFT, DFT e FFT Radix-2 Cooley-Tukey em
+          TypeScript &amp; Web Audio API.
+        </p>
+      </div>
+    </footer>
+
+    <!-- Modal Nativo <dialog> "Como Jogar" -->
+    <dialog id="howto-dialog" closedby="any" aria-labelledby="howto-dialog-title">
+      <div class="dialog-content">
+        <div class="dialog-header">
+          <h2 id="howto-dialog-title">Como Funciona — NOTA SECRETA</h2>
+          <form method="dialog">
+            <button
+              type="submit"
+              value="close"
+              class="btn-close-dialog"
+              aria-label="Fechar janela de instruções"
+              autofocus
+            >
+              &times;
+            </button>
+          </form>
+        </div>
+
+        <div class="dialog-body">
+          <ol class="howto-steps">
+            <li>
+              <strong>Escolha o modo de jogo:</strong>
+              <ul>
+                <li>
+                  <em>Aprendiz Musical (Fácil):</em> 7 notas naturais da
+                  4ª oitava (Dó4 a Si4).
+                </li>
+                <li>
+                  <em>Explorador Cromático (Intermediário):</em> 12
+                  notas com sustenidos em um teclado de uma oitava.
+                </li>
+                <li>
+                  <em>Mestre da FFT (Difícil):</em> 36 notas de
+                  Dó3 a Si5 (escolha a oitava e a nota).
+                </li>
+              </ul>
+            </li>
+            <li>
+              <strong>Ouça o som sintetizado:</strong> Clique em
+              <strong>"Ouvir nota"</strong>. O navegador gera matematicamente
+              as amostras discretas <code>x[n]</code> em tempo real. Você pode
+              repetir o som quantas vezes quiser.
+            </li>
+            <li>
+              <strong>Use a dica espectral se tiver dúvida:</strong> O botão
+              <strong>"Pedir dica"</strong> revela em qual faixa de frequência (Hz)
+              e bin da FFT o som está localizado, além de compará-lo à nota Lá4 (440 Hz).
+            </li>
+            <li>
+              <strong>Veja a FFT em ação após responder:</strong> Ao confirmar,
+              o sistema executa uma FFT de 16.384 amostras, desenha a onda no tempo
+              e o espectro de frequências lado a lado e mostra como o pico espectral
+              é convertido na nota musical.
+            </li>
+            <li>
+              <strong>Pontuação (10 rodadas):</strong>
+              <ul>
+                <li>Acerto sem dica: <strong>100 pontos</strong></li>
+                <li>Acerto com dica: <strong>60 pontos</strong></li>
+                <li>Erro: <strong>0 pontos</strong> (Máximo: 1.000 pontos)</li>
+              </ul>
+            </li>
+          </ol>
+        </div>
+
+        <div class="dialog-footer">
+          <form method="dialog">
+            <button type="submit" value="ok" class="btn btn-primary">
+              Entendi, vamos jogar!
+            </button>
+          </form>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

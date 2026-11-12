@@ -1,0 +1,20 @@
+{
+  "name": "nota-secreta",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Jogo educativo sobre Processamento Digital de Sinais, Análise de Frequência (DTFT, DFT e FFT) e reconhecimento de notas musicais.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "zip": "node scripts/package-itchio.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  }
+}
