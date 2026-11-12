@@ -1985,3 +1985,196 @@
     }
   }
 }
+
+/* Ajustes de layout: bancada do laboratório, estouros de largura e versão mobile */
+@layer components {
+  .select-control {
+    max-inline-size: 100%;
+  }
+
+  .zoom-row {
+    flex-wrap: wrap;
+  }
+
+  .zoom-row > .select-control {
+    flex: 1 1 150px;
+    min-inline-size: 0;
+  }
+
+  .freq-inputs-inline input[type='range'] {
+    min-inline-size: 0;
+  }
+
+  .lab-workbench {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .lab-workbench > * {
+    min-inline-size: 0;
+  }
+
+  /* Em telas largas os controles ficam ao lado dos gráficos, visíveis ao mesmo tempo */
+  @media (min-width: 1100px) {
+    .lab-workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+      align-items: start;
+    }
+
+    .lab-workbench .lab-panels-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .lab-workbench .lab-panel-card,
+    .lab-workbench .lab-controls-card {
+      padding: 1rem;
+    }
+
+    .lab-workbench .lab-controls-grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .header-container {
+      padding-inline: 0.75rem;
+      padding-block: 0.4rem;
+      gap: 0.35rem 0.6rem;
+    }
+
+    .brand-tagline,
+    .volume-label span,
+    .volume-value {
+      display: none;
+    }
+
+    .brand-icon {
+      inline-size: 24px;
+      block-size: 24px;
+    }
+
+    .brand-button {
+      min-block-size: 36px;
+    }
+
+    .volume-slider {
+      inline-size: 72px;
+    }
+
+    .primary-nav {
+      order: 3;
+      inline-size: 100%;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .nav-pill {
+      flex: 0 0 auto;
+      padding-inline: 0.7rem;
+      font-size: 0.82rem;
+      min-block-size: 36px;
+    }
+
+    .main-container {
+      padding-inline: 0.75rem;
+      padding-block: 0.85rem;
+    }
+
+    .hero-card,
+    .game-stage-card,
+    .results-card,
+    .lab-header-card,
+    .lab-experiments-card,
+    .lab-controls-card,
+    .lab-panel-card {
+      padding: 1rem;
+    }
+
+    .match-hud {
+      padding: 0.55rem 0.85rem;
+      gap: 0.5rem 1rem;
+    }
+
+    .stage-title {
+      font-size: 1.15rem;
+    }
+
+    /* Itens secundários saem para o piano e a confirmação caberem na primeira tela */
+    .stage-subtitle,
+    .piano-toolbar-title,
+    .match-hud .hud-item:has(#hud-difficulty),
+    #game-live-wave-canvas {
+      display: none;
+    }
+
+    .listen-deck {
+      padding: 0.6rem;
+      gap: 0.6rem;
+    }
+
+    .playback-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .playback-actions .btn {
+      min-inline-size: 0;
+      padding-inline: 0.5rem;
+      font-size: 0.82rem;
+    }
+
+    /* Piano cabe na largura da tela, sem rolagem horizontal */
+    .piano-keyboard {
+      padding: 0.5rem;
+      overflow-x: visible;
+    }
+
+    .piano-octave-bed {
+      min-inline-size: 0;
+      block-size: 150px;
+    }
+
+    .piano-white-keys {
+      gap: 3px;
+    }
+
+    .piano-black-keys,
+    .piano-key.sharp-key {
+      block-size: 90px;
+    }
+
+    .piano-key {
+      padding-inline: 0;
+    }
+
+    .key-degree,
+    .key-octave {
+      display: none;
+    }
+
+    .key-name {
+      font-size: 0.85rem;
+    }
+
+    .piano-key.sharp-key .key-name {
+      font-size: 0.58rem;
+    }
+
+    .confirm-bar {
+      margin-block-start: 0.5rem;
+    }
+
+    .confirm-bar .btn {
+      inline-size: 100%;
+    }
+
+    .lab-header-actions .btn {
+      flex: 1 1 100%;
+    }
+  }
+}

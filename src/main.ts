@@ -39,7 +39,7 @@ import {
 import { renderSpectrumCanvas } from './visualization/spectrumChart';
 import { renderWaveformCanvas } from './visualization/waveform';
 
-type ActiveView = 'home' | 'game' | 'results' | 'lab';
+type ActiveView = 'home' | 'game' | 'results' | 'lab' | 'theory';
 type LabExperimentId = 'exact' | 'leakage' | 'harmonics' | 'resolution' | 'custom';
 
 class NotaSecretaApp {
@@ -215,6 +215,7 @@ class NotaSecretaApp {
       game: document.getElementById('view-game'),
       results: document.getElementById('view-results'),
       lab: document.getElementById('view-lab'),
+      theory: document.getElementById('view-theory'),
     };
 
     (Object.keys(views) as ActiveView[]).forEach((k) => {
@@ -224,15 +225,23 @@ class NotaSecretaApp {
       }
     });
 
+    // Cada tela começa do topo: sem isso o conteúdo novo pode abrir fora da área visível
+    window.scrollTo(0, 0);
+
     const navHome = document.getElementById('nav-btn-home');
     const navGame = document.getElementById('nav-btn-game');
     const navLab = document.getElementById('nav-btn-lab');
+    const navTheory = document.getElementById('nav-btn-theory');
 
     navHome?.removeAttribute('aria-current');
     navGame?.removeAttribute('aria-current');
     navLab?.removeAttribute('aria-current');
+    navTheory?.removeAttribute('aria-current');
 
-    if (view === 'home') {
+    if (view === 'theory') {
+      navTheory?.setAttribute('aria-current', 'page');
+      document.title = 'Teoria de PDS | NOTA SECRETA';
+    } else if (view === 'home') {
       navHome?.setAttribute('aria-current', 'page');
       document.title = 'NOTA SECRETA | Descubra a frequência. Encontre a nota.';
       this.renderHighScores();
@@ -318,13 +327,10 @@ class NotaSecretaApp {
       this.switchView('lab');
     });
     document.getElementById('btn-trail-theory')?.addEventListener('click', () => {
-      this.switchView('lab');
-      requestAnimationFrame(() => {
-        document.getElementById('educational-topics-list')?.scrollIntoView({
-          behavior: this.reducedMotion ? 'auto' : 'smooth',
-          block: 'start',
-        });
-      });
+      this.switchView('theory');
+    });
+    document.getElementById('nav-btn-theory')?.addEventListener('click', () => {
+      this.switchView('theory');
     });
     document.getElementById('btn-trail-lab')?.addEventListener('click', () => {
       this.switchView('lab');
@@ -533,7 +539,7 @@ class NotaSecretaApp {
 
     const statusBadge = document.getElementById('wave-status-badge');
     if (statusBadge) {
-      statusBadge.textContent = 'Clique em "Ouvir nota" para sintetizar e escutar o sinal';
+      statusBadge.textContent = 'Sintetizando a nota secreta...';
     }
 
     // Seletor de oitava apenas no modo difícil
@@ -544,6 +550,10 @@ class NotaSecretaApp {
 
     this.renderIdleLiveWave();
     this.renderNoteSelectionControls();
+
+    // A rodada começa já tocando a nota: evita responder sem ouvir e poupa um clique
+    window.scrollTo(0, 0);
+    void this.playCurrentRoundNote();
   }
 
   private renderIdleLiveWave(): void {
@@ -600,6 +610,11 @@ class NotaSecretaApp {
 
       const replayBtn = document.getElementById('btn-replay-note') as HTMLButtonElement | null;
       if (replayBtn) replayBtn.disabled = false;
+
+      const confirmBtn = document.getElementById('btn-confirm-answer') as HTMLButtonElement | null;
+      if (confirmBtn && this.selectedNoteMidi !== null && !this.matchState.roundAnswered) {
+        confirmBtn.disabled = false;
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Falha ao iniciar o áudio.';
       this.announceToScreenReader(msg);
@@ -667,10 +682,7 @@ class NotaSecretaApp {
         'aria-pressed',
         this.selectedNoteMidi === note.midi ? 'true' : 'false'
       );
-      keyBtn.setAttribute(
-        'aria-label',
-        `Tecla branca ${note.fullName} (${Math.round(note.frequency)} Hz)`
-      );
+      keyBtn.setAttribute('aria-label', `Tecla branca ${note.fullName}`);
 
       const degSpan = document.createElement('span');
       degSpan.className = 'key-degree';
@@ -682,7 +694,7 @@ class NotaSecretaApp {
 
       const octSpan = document.createElement('span');
       octSpan.className = 'key-octave';
-      octSpan.textContent = `${note.fullName} • ${Math.round(note.frequency)} Hz`;
+      octSpan.textContent = note.fullName;
 
       keyBtn.appendChild(degSpan);
       keyBtn.appendChild(nameSpan);
@@ -720,10 +732,7 @@ class NotaSecretaApp {
           'aria-pressed',
           this.selectedNoteMidi === note.midi ? 'true' : 'false'
         );
-        keyBtn.setAttribute(
-          'aria-label',
-          `Tecla preta ${note.fullName} (${Math.round(note.frequency)} Hz)`
-        );
+        keyBtn.setAttribute('aria-label', `Tecla preta ${note.fullName}`);
         keyBtn.addEventListener('click', () => {
           this.handleSelectNoteOption(note);
         });
@@ -735,7 +744,7 @@ class NotaSecretaApp {
 
       const octSpan = document.createElement('span');
       octSpan.className = 'key-octave';
-      octSpan.textContent = isEasyMode ? '—' : `${Math.round(note.frequency)} Hz`;
+      octSpan.textContent = isEasyMode ? '—' : String(note.octave);
 
       keyBtn.appendChild(nameSpan);
       keyBtn.appendChild(octSpan);
@@ -755,21 +764,21 @@ class NotaSecretaApp {
 
     const previewEl = document.getElementById('selected-note-preview');
     if (previewEl) {
-      previewEl.innerHTML = `Sua escolha no piano: <strong class="highlight-cyan">${
-        note.fullName
-      } (${formatHz(note.frequency)})</strong>`;
+      previewEl.innerHTML = `Sua escolha no piano: <strong class="highlight-cyan">${note.fullName}</strong>`;
     }
 
+    // Só libera a confirmação depois que a nota secreta foi ouvida ao menos uma vez
     const confirmBtn = document.getElementById('btn-confirm-answer') as HTMLButtonElement | null;
     if (confirmBtn) {
-      confirmBtn.disabled = false;
+      confirmBtn.disabled = this.currentRoundSignal === null;
     }
 
-    // Toca o som da tecla clicada no pianinho se a opção estiver marcada
+    // Ouvir a tecla permite comparar de ouvido, então conta como dica na rodada
     const previewCheckbox = document.getElementById(
       'game-piano-preview-sound'
     ) as HTMLInputElement | null;
-    if (!previewCheckbox || previewCheckbox.checked) {
+    if (previewCheckbox?.checked) {
+      this.matchState = { ...this.matchState, usedHintInCurrentRound: true };
       void this.audioEngine.synthesizeAndPlay(note.frequency, this.prefs.timbre, 0.55);
     }
 
@@ -867,6 +876,10 @@ class NotaSecretaApp {
     const nextBtn = document.getElementById('btn-next-round');
 
     if (feedbackPanel) feedbackPanel.hidden = false;
+
+    // O resultado substitui o piano: volta ao topo e deixa "Próxima rodada" pronta no Enter
+    window.scrollTo(0, 0);
+    nextBtn?.focus({ preventScroll: true });
 
     if (banner) {
       banner.classList.toggle('is-correct', roundRecord.isCorrect);

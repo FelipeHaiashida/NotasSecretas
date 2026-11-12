@@ -135,33 +135,26 @@ export function pickRandomNote(
 export function generateHintForNote(
   note: MusicalNote,
   difficulty: DifficultyLevel,
-  sampleRate = 48000,
-  fftSize = 16384
+  _sampleRate = 48000,
+  _fftSize = 16384
 ): string {
-  const freq = note.frequency;
-  const lowerBound = Math.floor(freq / 50) * 50;
-  const upperBound = lowerBound + 50;
-  const approxBin = Math.round((freq * fftSize) / sampleRate);
-
-  const relationToA4 =
-    Math.abs(freq - 440) < 0.5
-      ? 'Esta nota corresponde exatamente à referência padrão de afinação (440 Hz).'
-      : freq > 440
-        ? 'A frequência fundamental desta nota está ACIMA da referência Lá4 (440 Hz).'
-        : 'A frequência fundamental desta nota está ABAIXO da referência Lá4 (440 Hz).';
-
-  const bandHint = `O pico dominante no espectro está localizado na faixa entre ${lowerBound} Hz e ${upperBound} Hz (próximo ao bin espectral k ≈ ${approxBin}).`;
+  // Dica relativa: reduz o espaço de busca pela metade sem revelar a frequência,
+  // já que valores em Hz permitiriam deduzir a nota sem ouvir.
+  const semitoneInOctave = ((note.midi % 12) + 12) % 12;
+  const bandHint =
+    semitoneInOctave < 5
+      ? 'O pico dominante do espectro está na metade grave da oitava (entre Dó e Mi).'
+      : 'O pico dominante do espectro está na metade aguda da oitava (entre Fá e Si).';
 
   if (difficulty === 'easy') {
-    const periodMs = (1000 / freq).toFixed(2).replace('.', ',');
-    return `${relationToA4} ${bandHint} Seu período no domínio do tempo é de aproximadamente T ≈ ${periodMs} ms.`;
+    return `${bandHint} Use o botão de referência para comparar: quanto mais aguda a nota, mais distante dela.`;
   }
 
   if (difficulty === 'intermediate') {
     const natureHint = note.isSharp
       ? 'Dica cromática: trata-se de uma nota alterada (sustenido / tecla preta).'
       : 'Dica cromática: trata-se de uma nota natural (tecla branca).';
-    return `${relationToA4} ${bandHint} ${natureHint}`;
+    return `${bandHint} ${natureHint}`;
   }
 
   // Modo difícil: inclui informação sobre a região de oitava e faixa espectral

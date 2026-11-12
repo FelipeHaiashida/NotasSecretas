@@ -70,8 +70,8 @@ describe('Testes das Regras do Jogo — Dificuldades, Sorteio, Dicas e Pontuaç�
     const c4 = easyNotes[0]; // Dó4 ≈ 261.63 Hz
     const hint = generateHintForNote(c4, 'easy', 48000, DEFAULT_FFT_SIZE);
 
-    expect(hint).toContain('ABAIXO da referência Lá4');
-    expect(hint).toContain('250 Hz e 300 Hz');
+    expect(hint).toContain('metade grave da oitava');
+    expect(hint).not.toMatch(/\d+ Hz/);
     expect(hint).not.toContain('Dó4');
   });
 

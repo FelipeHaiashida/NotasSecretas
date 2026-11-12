@@ -69,6 +69,9 @@
           <button type="button" id="nav-btn-lab" class="nav-pill">
             Laboratório FFT
           </button>
+          <button type="button" id="nav-btn-theory" class="nav-pill">
+            Teoria
+          </button>
           <button type="button" id="nav-btn-howto" class="nav-pill">
             Como Jogar
           </button>
@@ -326,7 +329,7 @@
                 Qual nota musical você está ouvindo?
               </h2>
               <p class="stage-subtitle" id="game-question-subtitle">
-                1. Clique em <strong>Ouvir nota</strong> &bull; 2. Selecione a nota abaixo &bull; 3. Confirme sua resposta
+                A nota toca ao iniciar a rodada &bull; Selecione a tecla no piano &bull; Confirme sua resposta
               </p>
             </div>
 
@@ -380,7 +383,7 @@
                   aria-label="Visualização da onda sonora no domínio do tempo"
                 ></canvas>
                 <div class="wave-status-overlay" id="wave-status-badge">
-                  Clique em "Ouvir nota" para sintetizar e escutar o sinal
+                  Sintetizando a nota secreta...
                 </div>
               </div>
             </div>
@@ -432,8 +435,8 @@
               <div class="piano-toolbar">
                 <span class="piano-toolbar-title">🎹 Teclado do Piano Virtual (Clique na tecla para selecionar):</span>
                 <label class="checkbox-inline" for="game-piano-preview-sound">
-                  <input type="checkbox" id="game-piano-preview-sound" checked />
-                  <span>Ouvir som da tecla ao clicar no piano</span>
+                  <input type="checkbox" id="game-piano-preview-sound" />
+                  <span>Ouvir a tecla ao clicar (conta como dica: −40 pts)</span>
                 </label>
               </div>
 
@@ -738,6 +741,8 @@
           </div>
         </div>
 
+        <!-- Bancada: gráficos e controles lado a lado em telas largas -->
+        <div class="lab-workbench">
         <!-- Painéis 1, 2 e 3: Gráficos no Topo para Feedback Visual Imediato -->
         <div class="lab-panels-grid">
           <!-- PAINEL 1: Sinal no Domínio do Tempo -->
@@ -933,6 +938,8 @@
           </div>
         </div>
 
+        </div>
+
         <!-- PAINEL 4: Análise Matemática Organizada em 3 Colunas Semânticas -->
         <article class="lab-panel-card">
           <div class="panel-header">
@@ -1018,6 +1025,12 @@
           </div>
         </article>
 
+      </section>
+
+      <!-- =================================================================
+           TELA 5: TEORIA — GUIA CONCEITUAL DE PDS
+           ================================================================= -->
+      <section id="view-theory" class="view-section" hidden>
         <!-- PAINEL 5: Explicação Educativa (9 Tópicos Fundamentais de PDS) -->
         <article class="lab-panel-card">
           <div class="panel-header">
@@ -1089,14 +1102,14 @@
             </li>
             <li>
               <strong>Ouça o som sintetizado:</strong> Clique em
-              <strong>"Ouvir nota"</strong>. O navegador gera matematicamente
+              <strong>"Ouvir nota"</strong> (ela também toca sozinha ao iniciar cada rodada). O navegador gera matematicamente
               as amostras discretas <code>x[n]</code> em tempo real. Você pode
               repetir o som quantas vezes quiser.
             </li>
             <li>
               <strong>Use a dica espectral se tiver dúvida:</strong> O botão
-              <strong>"Pedir dica"</strong> revela em qual faixa de frequência (Hz)
-              e bin da FFT o som está localizado, além de compará-lo à nota Lá4 (440 Hz).
+              <strong>"Pedir dica"</strong> revela em qual metade da oitava está o pico
+              do espectro. Ouvir as teclas do piano para comparar também conta como dica.
             </li>
             <li>
               <strong>Veja a FFT em ação após responder:</strong> Ao confirmar,
