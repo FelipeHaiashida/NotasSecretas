@@ -779,7 +779,13 @@ class NotaSecretaApp {
     ) as HTMLInputElement | null;
     if (previewCheckbox?.checked) {
       this.matchState = { ...this.matchState, usedHintInCurrentRound: true };
-      void this.audioEngine.synthesizeAndPlay(note.frequency, this.prefs.timbre, 0.55);
+      // O piano soa diferente da nota secreta (outro timbre e, fora do modo difícil,
+      // uma oitava abaixo) para que não baste procurar o som idêntico. No modo difícil
+      // a oitava faz parte da resposta, então ela é mantida.
+      const previewTimbre: TimbreType = this.prefs.timbre === 'sine' ? 'harmonic' : 'sine';
+      const previewFrequency =
+        this.matchState.difficulty === 'hard' ? note.frequency : note.frequency / 2;
+      void this.audioEngine.synthesizeAndPlay(previewFrequency, previewTimbre, 0.55);
     }
 
     this.renderNoteSelectionControls();
