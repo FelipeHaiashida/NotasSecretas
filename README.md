@@ -1,6 +1,11 @@
 # NOTA SECRETA
 ### Descubra a frequência. Encontre a nota.
 
+[![Deploy to GitHub Pages](https://github.com/FelipeHaiashida/NotasSecretas/actions/workflows/deploy.yml/badge.svg)](https://github.com/FelipeHaiashida/NotasSecretas/actions/workflows/deploy.yml)
+[![Acesse no GitHub Pages](https://img.shields.io/badge/Demo-GitHub%20Pages-brightgreen?style=flat&logo=github)](https://felipehaiashida.github.io/NotasSecretas/)
+
+**[👉 Jogue e teste online no GitHub Pages](https://felipehaiashida.github.io/NotasSecretas/)**
+
 **NOTA SECRETA** é um jogo educativo e laboratório interativo desenvolvido para a disciplina de **Processamento Digital de Sinais (PDS)** do curso de Ciência da Computação. A aplicação demonstra na prática como um computador sintetiza sinais discretos no tempo e identifica notas musicais por meio da **Transformada Rápida de Fourier (FFT)**.
 
 ---
