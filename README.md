@@ -37,6 +37,14 @@
   - **Painéis 2 e 3:** Espectro de frequências $|X[k]|$ em escala linear ou decibéis ($\text{dB}$) com comparação sobreposta entre **Janela de Hann** e **Janela Retangular**, botões para alinhar/desalinhar frequências aos bins da DFT e visualização do vazamento espectral.
   - **Painel 4:** Painel matemático em tempo real ($f_s$, $N = 16.384$, $\Delta f = f_s/N$, bin dominante $k_{\max}$, erro em Hz e em cents).
   - **Painel 5:** Guia didático interativo com 9 tópicos fundamentais de PDS.
+  - **🎙️ Cabine de Disfarce de Voz (Voice Disguise Lab):**
+    - Processamento em tempo real do microfone e síntese acústica com 5 transformações de PDS:
+      - **Robô Dalek (Ring Modulation):** Multiplicação no tempo por senóide portadora ($f_c$), demonstrando o Teorema da Modulação e a duplicação em bandas laterais ($f \pm f_c$).
+      - **Rádio 8-bit (Quebrador de Nyquist & Bitcrusher):** Quantização em $B$ bits (ruído de quantização) e decimação $D$ (violação proposital do Teorema de Nyquist-Shannon gerando Aliasing audível e visível na FFT).
+      - **Criptografia SIGSALY (Inversão Espectral):** Inversão $f' = f_c - f$ histórica da 2ª Guerra Mundial; inverte graves e agudos tornando a voz alienígena e decodificando-a ao reaplicar o algoritmo.
+      - **Agente Anônimo (Depoimento Secreto):** Filtro passa-faixa telefônico de 2ª ordem com saturação não linear e modulação sub-harmônica.
+      - **Overdrive Extremo (Harmônicos Ímpares):** Distorção $y[n] = \tanh(k \cdot x[n])$ com simetria ímpar que injeta exclusivamente harmônicos ímpares ($3f_0, 5f_0, 7f_0$).
+    - **Monitoramento ao Vivo com Fones** e **Sintetizador Acústico de Fala Espiã** com formantes $F_1$ e $F_2$ para testes rápidos sem microfone.
 
 ---
 
@@ -50,6 +58,11 @@
 - Janelamento no tempo ($x_w[n] = x[n] \cdot w[n]$) com Janela Retangular e Janela de Hann: $w[n] = 0{,}5 \cdot (1 - \cos(2\pi n / (N-1)))$
 - Vazamento espectral (*spectral leakage*) e interpolação parabólica entre bins
 - Temperamento musical igual: $f(m) = 440 \cdot 2^{(m-69)/12}$ e $m = 69 + 12 \cdot \log_2(f/440)$
+- Teorema da Modulação de Fourier: $x[n] \cdot \cos(2\pi f_c n / f_s) \iff \frac{1}{2}[X(f - f_c) + X(f + f_c)]$ (Modulação em Anel)
+- Teorema de Nyquist e Aliasing por Subamostragem: rebatimento de frequências superiores a $f_s/2$
+- Ruído de Quantização uniforme em $B$ bits: $\text{SNR} \approx 6{,}02 B + 1{,}76\text{ dB}$
+- Distorções não lineares ímpares ($\tanh$) e geração de harmônicos superiores ($3f_0, 5f_0, 7f_0$)
+- Inversão espectral de áudio para telecomunicações e criptografia clássica ($f' = f_{\text{inv}} - f$)
 
 ---
 

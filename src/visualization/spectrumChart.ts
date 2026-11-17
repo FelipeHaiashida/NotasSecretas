@@ -53,7 +53,7 @@ export function renderSpectrumCanvas(
   ctx.scale(dpr, dpr);
 
   // Fundo escuro limpo
-  ctx.fillStyle = '#090d1a';
+  ctx.fillStyle = '#15120f';
   ctx.fillRect(0, 0, width, height);
 
   const padLeft = 52;
@@ -80,7 +80,7 @@ export function renderSpectrumCanvas(
   const isCloseZoom = freqSpan <= 220;
 
   // Grade horizontal e eixo Y (reduzida para menor poluição visual)
-  ctx.font = '11px "Inter", system-ui, sans-serif';
+  ctx.font = '11px "Barlow", "Segoe UI", system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
 
@@ -90,13 +90,13 @@ export function renderSpectrumCanvas(
     const yTicks = [0, 0.5, 1.0];
     for (const val of yTicks) {
       const y = padTop + plotH * (1 - val);
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.strokeStyle = 'rgba(239, 230, 210, 0.09)';
       ctx.beginPath();
       ctx.moveTo(padLeft, y);
       ctx.lineTo(padLeft + plotW, y);
       ctx.stroke();
 
-      ctx.fillStyle = '#64748b';
+      ctx.fillStyle = '#8a7f6c';
       ctx.fillText(val.toFixed(1).replace('.', ','), padLeft - 8, y);
     }
   } else {
@@ -104,13 +104,13 @@ export function renderSpectrumCanvas(
     for (const db of dbTicks) {
       const norm = (db - dbFloor) / (0 - dbFloor);
       const y = padTop + plotH * (1 - norm);
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+      ctx.strokeStyle = 'rgba(239, 230, 210, 0.09)';
       ctx.beginPath();
       ctx.moveTo(padLeft, y);
       ctx.lineTo(padLeft + plotW, y);
       ctx.stroke();
 
-      ctx.fillStyle = '#64748b';
+      ctx.fillStyle = '#8a7f6c';
       ctx.fillText(`${db} dB`, padLeft - 8, y);
     }
   }
@@ -125,13 +125,13 @@ export function renderSpectrumCanvas(
     const f = minFreq + ratio * freqSpan;
     const x = padLeft + ratio * plotW;
 
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+    ctx.strokeStyle = 'rgba(239, 230, 210, 0.07)';
     ctx.beginPath();
     ctx.moveTo(x, padTop);
     ctx.lineTo(x, padTop + plotH);
     ctx.stroke();
 
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#8a7f6c';
     ctx.fillText(`${Math.round(f)} Hz`, x, padTop + plotH + 8);
   }
 
@@ -140,8 +140,8 @@ export function renderSpectrumCanvas(
   ctx.translate(14, padTop + plotH / 2);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '11px "Inter", system-ui, sans-serif';
+  ctx.fillStyle = '#b3a68c';
+  ctx.font = '11px "Barlow", "Segoe UI", system-ui, sans-serif';
   ctx.fillText(scaleMode === 'db' ? '|X[k]| (dB)' : '|X[k]| norm.', 0, 0);
   ctx.restore();
 
@@ -225,7 +225,7 @@ export function renderSpectrumCanvas(
 
         if (lineWidth > 2) {
           ctx.save();
-          ctx.strokeStyle = 'rgba(56, 189, 248, 0.22)';
+          ctx.strokeStyle = 'rgba(232, 184, 74, 0.24)';
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(x, padTop + plotH);
@@ -247,8 +247,8 @@ export function renderSpectrumCanvas(
   if (comparisonSpectrum) {
     drawSpectrumCurve(
       comparisonSpectrum,
-      'rgba(244, 63, 94, 0.85)',
-      'rgba(244, 63, 94, 0.1)',
+      'rgba(214, 64, 47, 0.9)',
+      'rgba(214, 64, 47, 0.1)',
       1.5,
       isCloseZoom
     );
@@ -256,10 +256,10 @@ export function renderSpectrumCanvas(
 
   // Desenha o espectro principal
   const grad = ctx.createLinearGradient(0, padTop, 0, padTop + plotH);
-  grad.addColorStop(0, 'rgba(56, 189, 248, 0.36)');
-  grad.addColorStop(1, 'rgba(34, 211, 238, 0.02)');
+  grad.addColorStop(0, 'rgba(232, 184, 74, 0.34)');
+  grad.addColorStop(1, 'rgba(232, 184, 74, 0.02)');
 
-  drawSpectrumCurve(spectrum, '#38bdf8', grad, 2.2, isCloseZoom);
+  drawSpectrumCurve(spectrum, '#e8b84a', grad, 2.2, isCloseZoom);
 
   // Marca múltiplos harmônicos (2f₀, 3f₀, 4f₀, 5f₀) quando ativado
   if (showHarmonics && peakFrequency && peakFrequency > 20) {
@@ -279,7 +279,7 @@ export function renderSpectrumCanvas(
       const normY = getNormY(spectrum, harmBin);
       const y = padTop + plotH * (1 - normY);
 
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
+      ctx.strokeStyle = 'rgba(232, 184, 74, 0.38)';
       ctx.setLineDash([2, 3]);
       ctx.beginPath();
       ctx.moveTo(x, Math.max(padTop + 18, y - 4));
@@ -287,12 +287,12 @@ export function renderSpectrumCanvas(
       ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.fillStyle = '#38bdf8';
+      ctx.fillStyle = '#e8b84a';
       ctx.beginPath();
       ctx.arc(x, y, 3, 0, 2 * Math.PI);
       ctx.fill();
 
-      ctx.fillStyle = '#bae6fd';
+      ctx.fillStyle = '#f7e2a8';
       ctx.fillText(`${h}f₀`, x, Math.max(padTop + 14, y - 6));
     }
     ctx.restore();
@@ -303,7 +303,7 @@ export function renderSpectrumCanvas(
     const peakX = padLeft + ((peakFrequency - minFreq) / freqSpan) * plotW;
 
     ctx.save();
-    ctx.strokeStyle = '#c084fc';
+    ctx.strokeStyle = '#ef7a63';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
@@ -313,7 +313,7 @@ export function renderSpectrumCanvas(
     ctx.setLineDash([]);
 
     // Círculo no topo do pico
-    ctx.fillStyle = '#c084fc';
+    ctx.fillStyle = '#ef7a63';
     ctx.beginPath();
     ctx.arc(peakX, padTop + 6, 4.5, 0, 2 * Math.PI);
     ctx.fill();
@@ -323,7 +323,7 @@ export function renderSpectrumCanvas(
       ? `f₀: ${formatHz(peakFrequency)} (${noteLabel})`
       : `f₀: ${formatHz(peakFrequency)}`;
 
-    ctx.font = '600 11px "Inter", system-ui, sans-serif';
+    ctx.font = '600 11px "Barlow", "Segoe UI", system-ui, sans-serif';
     const textWidth = ctx.measureText(tagText).width;
     const boxW = textWidth + 14;
     const boxH = 22;
@@ -333,15 +333,15 @@ export function renderSpectrumCanvas(
     );
     const boxY = padTop + 10;
 
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
-    ctx.strokeStyle = 'rgba(192, 132, 252, 0.7)';
+    ctx.fillStyle = 'rgba(20, 17, 14, 0.94)';
+    ctx.strokeStyle = 'rgba(239, 122, 99, 0.7)';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.roundRect(boxX, boxY, boxW, boxH, 6);
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = '#f3e8ff';
+    ctx.fillStyle = '#fbeee6';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(tagText, boxX + boxW / 2, boxY + boxH / 2);
@@ -351,10 +351,10 @@ export function renderSpectrumCanvas(
   // Se estiver em zoom próximo, indica que os pontos são as amostras discretas da DFT sobre a DTFT
   if (isCloseZoom) {
     ctx.save();
-    ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+    ctx.font = '500 10.5px "Barlow", "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#b3a68c';
     ctx.fillText(
       `● Bins discretos X[k] da DFT/FFT (Δf = ${formatHz(spectrum.frequencyResolution)}) amostram a DTFT`,
       padLeft + plotW - 6,

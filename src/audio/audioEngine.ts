@@ -7,6 +7,12 @@
  */
 
 import { SynthesizedSignal, synthesizeNoteSamples, TimbreType } from './synthesizer';
+import {
+  processVoiceDisguise,
+  synthesizeSpySpeechSignal,
+  VoiceDisguiseParams,
+  VoiceDisguiseType,
+} from '../dsp/voiceDisguise';
 
 export class AudioEngine {
   private context: AudioContext | null = null;
@@ -15,6 +21,11 @@ export class AudioEngine {
   private micStream: MediaStream | null = null;
   private micSource: MediaStreamAudioSourceNode | null = null;
   private micAnalyser: AnalyserNode | null = null;
+  private micProcessor: ScriptProcessorNode | null = null;
+  private monitorGain: GainNode | null = null;
+  private isMonitoring = false;
+  private activeDisguise: VoiceDisguiseType = 'none';
+  private disguiseParams: VoiceDisguiseParams = {};
   private volume = 0.7;
   private playbackEndTimer: number | null = null;
 
@@ -145,7 +156,89 @@ export class AudioEngine {
   }
 
   /**
-   * Inicia captura de áudio do microfone em tempo real para o Laboratório FFT.
+   * Define o efeito ativo de disfarce de voz.
+   */
+  public setVoiceDisguise(disguise: VoiceDisguiseType, params?: VoiceDisguiseParams): void {
+    this.activeDisguise = disguise;
+    if (params) {
+      this.disguiseParams = { ...this.disguiseParams, ...params };
+    }
+  }
+
+  /**
+   * Obtém o efeito ativo de disfarce de voz.
+   */
+  public getVoiceDisguise(): VoiceDisguiseType {
+    return this.activeDisguise;
+  }
+
+  /**
+   * Atualiza os parâmetros do efeito ativo.
+   */
+  public setDisguiseParams(params: VoiceDisguiseParams): void {
+    this.disguiseParams = { ...this.disguiseParams, ...params };
+  }
+
+  /**
+   * Retorna os parâmetros atuais de disfarce vocal.
+   */
+  public getDisguiseParams(): VoiceDisguiseParams {
+    return { ...this.disguiseParams };
+  }
+
+  /**
+   * Ativa ou desativa o monitoramento de áudio (escutar a própria voz nos fones).
+   */
+  public setMonitorAudio(enable: boolean): void {
+    this.isMonitoring = enable;
+    if (this.monitorGain && this.context) {
+      this.monitorGain.gain.setValueAtTime(
+        enable ? 0.8 : 0,
+        this.context.currentTime
+      );
+    }
+  }
+
+  /**
+   * Verifica se o monitoramento de áudio está ligado.
+   */
+  public isMonitoringAudio(): boolean {
+    return this.isMonitoring;
+  }
+
+  /**
+   * Sintetiza uma frase vocal de espionagem com formantes acústicos e aplica o disfarce ativo,
+   * reproduzindo no AudioContext e retornando as amostras processadas para a FFT.
+   */
+  public async playSpySpeechSignal(
+    disguise?: VoiceDisguiseType,
+    params?: VoiceDisguiseParams,
+    onEnded?: () => void
+  ): Promise<SynthesizedSignal> {
+    const ctx = await this.ensureContext();
+    this.stopPlayback();
+
+    const eff = disguise ?? this.activeDisguise;
+    const p = params ?? this.disguiseParams;
+
+    const rawSamples = synthesizeSpySpeechSignal(ctx.sampleRate);
+    const processedSamples = processVoiceDisguise(rawSamples, ctx.sampleRate, eff, p);
+
+    const signal: SynthesizedSignal = {
+      samples: processedSamples,
+      frequency: 130, // Frequência média aproximada da fala
+      sampleRate: ctx.sampleRate,
+      durationSeconds: processedSamples.length / ctx.sampleRate,
+      timbre: 'harmonic',
+    };
+
+    await this.playSynthesizedSignal(signal, onEnded);
+    return signal;
+  }
+
+  /**
+   * Inicia captura de áudio do microfone em tempo real para o Laboratório FFT
+   * com suporte a efeitos de disfarce de voz e monitoramento auditivo seguro.
    */
   public async startMicrophone(fftSize = 16384): Promise<void> {
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -168,11 +261,49 @@ export class AudioEngine {
     const analyser = ctx.createAnalyser();
     analyser.fftSize = Math.min(32768, Math.max(1024, fftSize));
     analyser.smoothingTimeConstant = 0;
-    source.connect(analyser);
+
+    // Processador de DSP em tempo real para os efeitos de disfarce de voz
+    const bufferSize = 2048;
+    const processor = ctx.createScriptProcessor(bufferSize, 1, 1);
+
+    processor.onaudioprocess = (e: AudioProcessingEvent) => {
+      const input = e.inputBuffer.getChannelData(0);
+      const output = e.outputBuffer.getChannelData(0);
+
+      if (this.activeDisguise === 'none') {
+        output.set(input);
+      } else {
+        const processed = processVoiceDisguise(
+          input,
+          ctx.sampleRate,
+          this.activeDisguise,
+          this.disguiseParams
+        );
+        output.set(processed);
+      }
+    };
+
+    // Ganho de monitoramento (inicia em 0 para prevenir microfonia se não estiver de fone)
+    const monitorGain = ctx.createGain();
+    monitorGain.gain.setValueAtTime(
+      this.isMonitoring ? 0.8 : 0,
+      ctx.currentTime
+    );
+
+    // Encadeamento Web Audio:
+    // micSource -> processor -> analyser (FFT / Osciloscópio) -> monitorGain -> masterGain
+    source.connect(processor);
+    processor.connect(analyser);
+    analyser.connect(monitorGain);
+    if (this.masterGain) {
+      monitorGain.connect(this.masterGain);
+    }
 
     this.micStream = stream;
     this.micSource = source;
     this.micAnalyser = analyser;
+    this.micProcessor = processor;
+    this.monitorGain = monitorGain;
   }
 
   /**
@@ -208,6 +339,22 @@ export class AudioEngine {
    * Encerra a captura de áudio do microfone e libera o dispositivo.
    */
   public stopMicrophone(): void {
+    if (this.micProcessor) {
+      try {
+        this.micProcessor.disconnect();
+      } catch {
+        // Ignora
+      }
+      this.micProcessor = null;
+    }
+    if (this.monitorGain) {
+      try {
+        this.monitorGain.disconnect();
+      } catch {
+        // Ignora
+      }
+      this.monitorGain = null;
+    }
     if (this.micSource) {
       try {
         this.micSource.disconnect();

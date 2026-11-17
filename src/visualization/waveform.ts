@@ -50,7 +50,7 @@ export function renderWaveformCanvas(
   ctx.scale(dpr, dpr);
 
   // Fundo escuro limpo
-  ctx.fillStyle = '#090d1a';
+  ctx.fillStyle = '#15120f';
   ctx.fillRect(0, 0, width, height);
 
   const padLeft = 48;
@@ -62,12 +62,12 @@ export function renderWaveformCanvas(
   const centerY = padTop + plotH / 2;
 
   // Grade de fundo minimalista (apenas -1, 0, +1 para reduzir poluição visual)
-  ctx.strokeStyle = 'rgba(148, 163, 184, 0.1)';
+  ctx.strokeStyle = 'rgba(239, 230, 210, 0.09)';
   ctx.lineWidth = 1;
 
   const amplitudeTicks = [-1, -0.5, 0, 0.5, 1];
-  ctx.fillStyle = '#64748b';
-  ctx.font = '11px "Inter", system-ui, sans-serif';
+  ctx.fillStyle = '#8a7f6c';
+  ctx.font = '11px "Barlow", "Segoe UI", system-ui, sans-serif';
   ctx.textAlign = 'right';
   ctx.textBaseline = 'middle';
 
@@ -83,7 +83,7 @@ export function renderWaveformCanvas(
   }
 
   // Linha zero mais destacada
-  ctx.strokeStyle = 'rgba(56, 189, 248, 0.25)';
+  ctx.strokeStyle = 'rgba(232, 184, 74, 0.28)';
   ctx.beginPath();
   ctx.moveTo(padLeft, centerY);
   ctx.lineTo(padLeft + plotW, centerY);
@@ -94,7 +94,7 @@ export function renderWaveformCanvas(
     sampleRate,
     timeWindowMs = 15,
     startSample,
-    strokeColor = '#22d3ee',
+    strokeColor = '#e8b84a',
     showDiscreteSamples = false,
     windowTypePreview,
     label,
@@ -119,14 +119,14 @@ export function renderWaveformCanvas(
   const timeTicks = 4;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  ctx.fillStyle = '#64748b';
+  ctx.fillStyle = '#8a7f6c';
 
   for (let i = 0; i <= timeTicks; i++) {
     const ratio = i / timeTicks;
     const x = padLeft + ratio * plotW;
     const tMs = ratio * actualDurationMs;
 
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+    ctx.strokeStyle = 'rgba(239, 230, 210, 0.07)';
     ctx.beginPath();
     ctx.moveTo(x, padTop);
     ctx.lineTo(x, padTop + plotH);
@@ -140,8 +140,8 @@ export function renderWaveformCanvas(
   ctx.translate(14, centerY);
   ctx.rotate(-Math.PI / 2);
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = '11px "Inter", system-ui, sans-serif';
+  ctx.fillStyle = '#b3a68c';
+  ctx.font = '11px "Barlow", "Segoe UI", system-ui, sans-serif';
   ctx.fillText('x[n]', 0, 0);
   ctx.restore();
 
@@ -150,8 +150,8 @@ export function renderWaveformCanvas(
     ctx.save();
     const isRect = windowTypePreview === 'rectangular';
     ctx.strokeStyle = isRect
-      ? 'rgba(251, 113, 133, 0.55)'
-      : 'rgba(192, 132, 252, 0.65)';
+      ? 'rgba(214, 64, 47, 0.6)'
+      : 'rgba(239, 230, 210, 0.55)';
     ctx.lineWidth = 1.5;
     ctx.setLineDash([5, 4]);
 
@@ -175,10 +175,10 @@ export function renderWaveformCanvas(
     const envLabel = isRect
       ? 'Envoltória w[n]: Retangular (corte abrupto)'
       : `Envoltória w[n]: ${winMeta.shortName} (1º lóbulo: ${winMeta.firstSidelobeDb.toString().replace('.', ',')} dB)`;
-    ctx.font = '500 10.5px "Inter", system-ui, sans-serif';
+    ctx.font = '500 10.5px "Barlow", "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'top';
-    ctx.fillStyle = isRect ? '#fda4af' : '#d8b4fe';
+    ctx.fillStyle = isRect ? '#f2937f' : '#efe6d2';
     ctx.fillText(envLabel, padLeft + plotW - 6, padTop + 4);
     ctx.restore();
   }
@@ -208,7 +208,7 @@ export function renderWaveformCanvas(
 
     // Pontos discretos x[n] caso solicitado (ex.: zoom de 10 ms)
     if (showDiscreteSamples) {
-      ctx.fillStyle = '#f8fafc';
+      ctx.fillStyle = '#efe6d2';
       const step = Math.max(1, Math.floor(numSamplesToDisplay / 65));
       for (let i = 0; i < numSamplesToDisplay; i += step) {
         const sampleVal = Math.max(-1.05, Math.min(1.05, samples[offset + i] ?? 0));
@@ -222,8 +222,8 @@ export function renderWaveformCanvas(
   }
 
   if (label) {
-    ctx.fillStyle = '#cbd5e1';
-    ctx.font = '600 11.5px "Inter", system-ui, sans-serif';
+    ctx.fillStyle = '#d9ccb0';
+    ctx.font = '600 11.5px "Barlow", "Segoe UI", system-ui, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText(label, padLeft + 8, padTop + 4);

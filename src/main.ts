@@ -11,6 +11,12 @@ import { SynthesizedSignal, synthesizeNoteSamples, TimbreType } from './audio/sy
 import { EDUCATIONAL_TOPICS } from './components/educationalContent';
 import { DEFAULT_FFT_SIZE, detectPitchFromSamples, PitchDetectionResult } from './dsp/pitchDetection';
 import { analyzeSpectrum, binToFrequency, extractStableSegment } from './dsp/spectrum';
+import {
+  processVoiceDisguise,
+  VOICE_DISGUISE_CATALOG,
+  VoiceDisguiseParams,
+  VoiceDisguiseType,
+} from './dsp/voiceDisguise';
 import { getWindowMetadata, WindowType } from './dsp/windows';
 import {
   advanceToNextRound,
@@ -70,6 +76,15 @@ class NotaSecretaApp {
   private labShowWindowEnv = true;
   private activeLabExperiment: LabExperimentId = 'leakage';
 
+  // Estado da Cabine de Disfarce Vocal (Efeitos de PDS)
+  private activeDisguise: VoiceDisguiseType = 'none';
+  private disguiseParams: VoiceDisguiseParams = {
+    carrierFrequency: 120,
+    bits: 4,
+    downsampleFactor: 8,
+    overdriveGain: 8,
+  };
+
   public init(): void {
     this.setupDialogLightDismissFallback();
     this.setupScrollHeaderFallback();
@@ -87,7 +102,7 @@ class NotaSecretaApp {
    * Fallback de preenchimento dinâmico para inputs range em navegadores sem suporte a accent-color.
    */
   private setupRangeProgressFallback(): void {
-    if (typeof CSS !== 'undefined' && !CSS.supports('accent-color', '#22d3ee')) {
+    if (typeof CSS !== 'undefined' && !CSS.supports('accent-color', '#e8b84a')) {
       const updateSliderProgress = (slider: HTMLInputElement) => {
         const min = Number(slider.min) || 0;
         const max = Number(slider.max) || 100;
@@ -426,14 +441,14 @@ class NotaSecretaApp {
 
         ctx.save();
         ctx.scale(dpr, dpr);
-        ctx.fillStyle = '#090d1a';
+        ctx.fillStyle = '#15120f';
         ctx.fillRect(0, 0, w, h);
 
         const midY = h / 2;
         const waves = [
-          { freq: 2.0, amp: 0.36, color: '#22d3ee', speed: 1.0, width: 2.2 },
-          { freq: 4.0, amp: 0.17, color: '#a855f7', speed: -1.4, width: 1.6 },
-          { freq: 6.0, amp: 0.09, color: '#38bdf8', speed: 2.1, width: 1.2 },
+          { freq: 2.0, amp: 0.36, color: '#e8b84a', speed: 1.0, width: 2.2 },
+          { freq: 4.0, amp: 0.17, color: '#d6402f', speed: -1.4, width: 1.6 },
+          { freq: 6.0, amp: 0.09, color: '#efe6d2', speed: 2.1, width: 1.2 },
         ];
 
         for (const wave of waves) {
@@ -564,7 +579,7 @@ class NotaSecretaApp {
       samples: flatSamples,
       sampleRate: 48000,
       timeWindowMs: 15,
-      strokeColor: '#334155',
+      strokeColor: '#4a4236',
       label: 'Aguardando reprodução sonora...',
     });
   }
@@ -576,7 +591,7 @@ class NotaSecretaApp {
       samples: signal.samples,
       sampleRate: signal.sampleRate,
       timeWindowMs: 15,
-      strokeColor: '#22d3ee',
+      strokeColor: '#e8b84a',
       label: `Sinal sintetizado (${
         signal.timbre === 'sine' ? 'Senoidal Puro' : 'Com Harmônicos'
       })`,
@@ -996,7 +1011,7 @@ class NotaSecretaApp {
           samples: signal.samples,
           sampleRate: signal.sampleRate,
           timeWindowMs: 15,
-          strokeColor: '#22d3ee',
+          strokeColor: '#e8b84a',
           windowTypePreview: pitchResult.spectrum.windowType,
           label: `${roundRecord.targetNote.fullName} (T = ${formatNumberPtBr(
             1000 / roundRecord.theoreticalFrequency
@@ -1270,7 +1285,7 @@ class NotaSecretaApp {
         sampleRate: fs,
         timeWindowMs: this.labTimeSpanMs,
         startSample: 0,
-        strokeColor: '#34d399',
+        strokeColor: '#a9cc7e',
         showDiscreteSamples: this.labTimeSpanMs <= 10,
         windowTypePreview: this.labShowWindowEnv ? this.labWindow : undefined,
         label:
@@ -1505,11 +1520,19 @@ class NotaSecretaApp {
       this.updateLabSimulation();
     });
 
-    document.getElementById('btn-lab-play-audio')?.addEventListener('click', () => {
+    document.getElementById('btn-lab-play-audio')?.addEventListener('click', async () => {
       if (this.audioEngine.isMicrophoneActive()) {
         this.stopLabMicrophoneMode();
       }
-      void this.audioEngine.synthesizeAndPlay(this.labFrequency, this.labTimbre, 1.2);
+      const synth = await this.audioEngine.synthesizeAndPlay(this.labFrequency, this.labTimbre, 1.2);
+      if (this.activeDisguise !== 'none') {
+        const fs = this.audioEngine.getSampleRate();
+        const processed = processVoiceDisguise(synth.samples, fs, this.activeDisguise, this.disguiseParams);
+        await this.audioEngine.playSynthesizedSignal({
+          ...synth,
+          samples: processed,
+        });
+      }
     });
 
     document.getElementById('btn-lab-mic-toggle')?.addEventListener('click', () => {
@@ -1523,6 +1546,173 @@ class NotaSecretaApp {
         this.switchView('home');
       }
     });
+
+    this.setupVoiceDisguiseControls();
+  }
+
+  private setupVoiceDisguiseControls(): void {
+    const disguiseBtns = document.querySelectorAll<HTMLButtonElement>('.disguise-btn');
+    const carrierRow = document.getElementById('param-row-carrier');
+    const bitsRow = document.getElementById('param-row-bits');
+    const downsampleRow = document.getElementById('param-row-downsample');
+    const gainRow = document.getElementById('param-row-gain');
+
+    const carrierSlider = document.getElementById('disguise-param-carrier') as HTMLInputElement | null;
+    const bitsSlider = document.getElementById('disguise-param-bits') as HTMLInputElement | null;
+    const downsampleSlider = document.getElementById('disguise-param-downsample') as HTMLInputElement | null;
+    const gainSlider = document.getElementById('disguise-param-gain') as HTMLInputElement | null;
+
+    const carrierVal = document.getElementById('disguise-val-carrier');
+    const bitsVal = document.getElementById('disguise-val-bits');
+    const downsampleVal = document.getElementById('disguise-val-downsample');
+    const gainVal = document.getElementById('disguise-val-gain');
+
+    const updateInfoPanel = (type: VoiceDisguiseType) => {
+      const info = VOICE_DISGUISE_CATALOG[type];
+      const tagEl = document.getElementById('disguise-tag');
+      const nameEl = document.getElementById('disguise-name');
+      const formulaEl = document.getElementById('disguise-formula');
+      const textEl = document.getElementById('disguise-explanation');
+      const obsEl = document.getElementById('disguise-observation');
+
+      if (tagEl) tagEl.textContent = `PDS • ${info.badge}`;
+      if (nameEl) nameEl.textContent = info.name;
+      if (formulaEl) formulaEl.textContent = info.formulaLatex;
+      if (textEl) textEl.textContent = info.dspExplanation;
+      if (obsEl) obsEl.innerHTML = `<strong>O que observar na FFT:</strong> ${info.whatToObserve}`;
+
+      if (carrierRow) carrierRow.hidden = type !== 'dalek' && type !== 'scrambler';
+      if (bitsRow) bitsRow.hidden = type !== 'bitcrush';
+      if (downsampleRow) downsampleRow.hidden = type !== 'bitcrush';
+      if (gainRow) gainRow.hidden = type !== 'overdrive';
+
+      if (type === 'scrambler' && carrierSlider && carrierVal) {
+        carrierSlider.min = '1500';
+        carrierSlider.max = '4500';
+        carrierSlider.step = '50';
+        carrierSlider.value = String(this.disguiseParams.carrierFrequency ?? 3300);
+        carrierVal.textContent = `${carrierSlider.value} Hz`;
+      } else if (type === 'dalek' && carrierSlider && carrierVal) {
+        carrierSlider.min = '30';
+        carrierSlider.max = '600';
+        carrierSlider.step = '5';
+        carrierSlider.value = String(this.disguiseParams.carrierFrequency ?? 120);
+        carrierVal.textContent = `${carrierSlider.value} Hz`;
+      }
+    };
+
+    disguiseBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const type = btn.dataset.disguise as VoiceDisguiseType;
+        if (!type) return;
+
+        this.activeDisguise = type;
+        this.audioEngine.setVoiceDisguise(type, this.disguiseParams);
+
+        disguiseBtns.forEach((b) => {
+          const isTarget = b === btn;
+          b.classList.toggle('active', isTarget);
+          b.setAttribute('aria-checked', isTarget ? 'true' : 'false');
+        });
+
+        updateInfoPanel(type);
+        this.announceToScreenReader(`Efeito de voz alterado para: ${VOICE_DISGUISE_CATALOG[type].name}`);
+        this.updateLabSimulation();
+      });
+    });
+
+    carrierSlider?.addEventListener('input', () => {
+      const val = Number(carrierSlider.value);
+      this.disguiseParams.carrierFrequency = val;
+      if (carrierVal) carrierVal.textContent = `${val} Hz`;
+      this.audioEngine.setDisguiseParams(this.disguiseParams);
+      this.updateLabSimulation();
+    });
+
+    bitsSlider?.addEventListener('input', () => {
+      const val = Number(bitsSlider.value);
+      this.disguiseParams.bits = val;
+      if (bitsVal) bitsVal.textContent = `${val} bits`;
+      this.audioEngine.setDisguiseParams(this.disguiseParams);
+      this.updateLabSimulation();
+    });
+
+    downsampleSlider?.addEventListener('input', () => {
+      const val = Number(downsampleSlider.value);
+      this.disguiseParams.downsampleFactor = val;
+      if (downsampleVal) downsampleVal.textContent = `${val}x (fs/${val})`;
+      this.audioEngine.setDisguiseParams(this.disguiseParams);
+      this.updateLabSimulation();
+    });
+
+    gainSlider?.addEventListener('input', () => {
+      const val = Number(gainSlider.value);
+      this.disguiseParams.overdriveGain = val;
+      if (gainVal) gainVal.textContent = val.toFixed(1);
+      this.audioEngine.setDisguiseParams(this.disguiseParams);
+      this.updateLabSimulation();
+    });
+
+    const monitorChk = document.getElementById('chk-disguise-monitor') as HTMLInputElement | null;
+    monitorChk?.addEventListener('change', () => {
+      const isMon = monitorChk.checked;
+      this.audioEngine.setMonitorAudio(isMon);
+      this.announceToScreenReader(
+        isMon
+          ? 'Monitoramento de áudio nos fones ativado. Cuidado com microfonia se não estiver usando fones.'
+          : 'Monitoramento de áudio nos fones desativado.'
+      );
+    });
+
+    document.getElementById('btn-disguise-spy-audio')?.addEventListener('click', async () => {
+      if (this.audioEngine.isMicrophoneActive()) {
+        this.stopLabMicrophoneMode();
+      }
+      const expCallout = document.getElementById('lab-experiment-callout');
+      if (expCallout) {
+        expCallout.innerHTML = `<strong>📻 Transmissão Secreta:</strong> Reproduzindo frase fonética com formantes acústicos e efeito <strong class="highlight-cyan">${VOICE_DISGUISE_CATALOG[this.activeDisguise].name}</strong>.`;
+      }
+      const spySignal = await this.audioEngine.playSpySpeechSignal(this.activeDisguise, this.disguiseParams);
+      this.displaySpySignalInLab(spySignal.samples);
+    });
+  }
+
+  private displaySpySignalInLab(samples: Float32Array): void {
+    const fs = this.audioEngine.getSampleRate();
+    const pitchResult = detectPitchFromSamples(samples, fs, {
+      fftSize: this.labFftSize,
+      windowType: this.labWindow,
+    });
+
+    const waveCanvas = document.getElementById('lab-waveform-canvas') as HTMLCanvasElement | null;
+    if (waveCanvas) {
+      renderWaveformCanvas(waveCanvas, {
+        samples,
+        sampleRate: fs,
+        timeWindowMs: this.labTimeSpanMs,
+        startSample: 0,
+        strokeColor: '#e8b84a',
+        showDiscreteSamples: this.labTimeSpanMs <= 10,
+        windowTypePreview: this.labShowWindowEnv ? this.labWindow : undefined,
+        label: `📻 Frase Secreta Sintetizada [${VOICE_DISGUISE_CATALOG[this.activeDisguise].name}]`,
+      });
+    }
+
+    const specCanvas = document.getElementById('lab-spectrum-canvas') as HTMLCanvasElement | null;
+    if (specCanvas && pitchResult.success) {
+      renderSpectrumCanvas(specCanvas, {
+        spectrum: pitchResult.spectrum,
+        peakFrequency: pitchResult.estimatedFrequency,
+        dominantBin: pitchResult.dominantBin,
+        minFrequencyHz: 0,
+        maxFrequencyHz: 3000,
+        scaleMode: this.labScaleMode,
+        noteLabel: `Voz (${VOICE_DISGUISE_CATALOG[this.activeDisguise].name})`,
+        showHarmonics: true,
+      });
+    }
+
+    this.updateLabMathPanel(fs, pitchResult, 130, false);
   }
 
   private updateLabMathPanel(
@@ -1603,7 +1793,12 @@ class NotaSecretaApp {
       releaseSeconds: 0.04,
     });
 
-    const pitchResult = detectPitchFromSamples(synthSignal.samples, fs, {
+    const activeSamples =
+      this.activeDisguise !== 'none'
+        ? processVoiceDisguise(synthSignal.samples, fs, this.activeDisguise, this.disguiseParams)
+        : synthSignal.samples;
+
+    const pitchResult = detectPitchFromSamples(activeSamples, fs, {
       fftSize: this.labFftSize,
       windowType: this.labWindow,
       theoreticalFrequency: this.labFrequency,
@@ -1611,7 +1806,7 @@ class NotaSecretaApp {
 
     const otherWindowType: WindowType =
       this.labWindow === 'rectangular' ? 'hann' : 'rectangular';
-    const stableSegment = extractStableSegment(synthSignal.samples, this.labFftSize, fs, 0.03);
+    const stableSegment = extractStableSegment(activeSamples, this.labFftSize, fs, 0.03);
     const comparisonSpectrum =
       this.labCompareWindows === 'both'
         ? analyzeSpectrum(stableSegment, fs, otherWindowType)
@@ -1687,17 +1882,21 @@ class NotaSecretaApp {
     // Renderiza Painel 1: Domínio do Tempo
     const waveCanvas = document.getElementById('lab-waveform-canvas') as HTMLCanvasElement | null;
     if (waveCanvas) {
+      const disguiseTag =
+        this.activeDisguise !== 'none'
+          ? ` [${VOICE_DISGUISE_CATALOG[this.activeDisguise].name}]`
+          : '';
       renderWaveformCanvas(waveCanvas, {
         samples: stableSegment,
         sampleRate: fs,
         timeWindowMs: this.labTimeSpanMs,
         startSample: 0,
-        strokeColor: '#22d3ee',
+        strokeColor: this.activeDisguise !== 'none' ? '#e0604a' : '#e8b84a',
         showDiscreteSamples: this.labTimeSpanMs <= 10,
         windowTypePreview: this.labShowWindowEnv ? this.labWindow : undefined,
         label: `f₀ = ${formatHz(this.labFrequency)} | Período T = ${formatNumberPtBr(
           1000 / this.labFrequency
-        )} ms`,
+        )} ms${disguiseTag}`,
       });
     }
 
@@ -1724,8 +1923,11 @@ class NotaSecretaApp {
         minFrequencyHz: minFreq,
         maxFrequencyHz: maxFreq,
         scaleMode: this.labScaleMode,
-        noteLabel: pitchResult.detectedNote?.note.fullName,
-        showHarmonics: this.labTimbre === 'harmonic',
+        noteLabel:
+          this.activeDisguise !== 'none'
+            ? `${pitchResult.detectedNote?.note.fullName ?? 'Sinal'} (${VOICE_DISGUISE_CATALOG[this.activeDisguise].name})`
+            : pitchResult.detectedNote?.note.fullName,
+        showHarmonics: this.labTimbre === 'harmonic' || this.activeDisguise === 'overdrive',
       });
     }
 
