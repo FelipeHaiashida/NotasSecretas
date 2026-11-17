@@ -10,10 +10,11 @@ sobretudo caramelo, bigode ondulado e uma corneta de gramofone encostada na
 orelha. Desenhado no estilo *rubber hose*: luvas brancas, olhos *pie-cut* e
 contornos grossos de tinta, dentro de um selo redondo vermelho.
 
-- Arte da home: `public/brand/detetive.webp` (640 px, cantos transparentes)
-- Versão compacta (logo e favicon): `public/favicon.png` (192 px)
-- A arte foi gerada por IA e é uma imagem, não um vetor. Na home ela tem uma
-  única animação sutil (inclinar a cabeça), desligada com `prefers-reduced-motion`.
+- Arte vetorial (home e logo do cabeçalho): `public/brand/detetive.svg`, com fundo
+  transparente fora do selo
+- Favicon: `public/favicon.png` (192 px)
+- A arte foi gerada por IA e depois vetorizada. Na home ela tem uma única animação
+  sutil (inclinar a cabeça), desligada com `prefers-reduced-motion`.
 
 ## Paleta
 
